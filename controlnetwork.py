@@ -1,8 +1,34 @@
-from scapy.all import ARP, send
+from scapy.all import *
+import datetime
 import time
+import telebot;
+from conf import api
 
-while True:
-    print("еще сто")
-    for _ in range(100):  # Отправляем 100 пакетов подряд без паузы
-        arp_packet = ARP(op=2, psrc="192.168.8.1", pdst="192.168.8.156", hwdst="08:bf:b8:a7:15:2e")
-        send(arp_packet, verbose=False)
+bot = telebot.TeleBot(api)
+
+# Список IP, которые сканируют
+detected_ips = []
+
+def detect_scan(packet):
+    global detected_ips
+    if packet.haslayer(TCP):
+        tcp_layer = packet.getlayer(TCP)
+        
+        if tcp_layer.flags in ("S", ""):
+            #Флаг SYN указывает на начало попытки установить TCP-соединение (что может быть частью сканирования сети, как в случае с nmap).
+            #Пустой флаг (NULL) может означать NULL-сканирование, которое часто используется для обхода фильтров.
+            src_ip = packet[IP].src
+            if src_ip not in detected_ips:
+                print(f"[*] Обнаружен подозрительный запрос от: {src_ip} в {datetime.datetime.now()}")
+                bot.send_message(5078594714, f"[*] Обнаружен подозрительный запрос от: {src_ip} в {datetime.datetime.now()}")
+                detected_ips.append([src_ip, datetime.datetime.now()])
+                time.sleep(5)
+print("Сканирование локальной сети на подозрительные запросы...")
+
+try:
+    #iface="wlx5c628b74f73b"
+    #nmap -sS 192.168.1.0/24
+    sniff(filter="tcp", prn=detect_scan, store=0)
+except KeyboardInterrupt:
+    print("\nПрограмма остановлена.")
+        
