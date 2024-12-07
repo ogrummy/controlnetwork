@@ -20,7 +20,7 @@ def detect_scan(packet):
             src_ip = packet[IP].src
             if src_ip not in detected_ips:
                 print(f"[*] Обнаружен подозрительный запрос от: {src_ip} в {datetime.datetime.now()}")
-                bot.send_message(5078594714, f"[*] Обнаружен подозрительный запрос от: {src_ip} в {datetime.datetime.now()}")
+                bot.send_message(HERE U NEED TO INSERT YOU'RE CAHT ID WITH UR BOT, f"[*] Обнаружен подозрительный запрос от: {src_ip} в {datetime.datetime.now()}")
                 detected_ips.append([src_ip, datetime.datetime.now()])
                 time.sleep(5)
 print("Сканирование локальной сети на подозрительные запросы...")
